@@ -1,4 +1,8 @@
 import java.util.ArrayList;
 public class FlightPlanData {
-	ArrayList<Waypoint> WaypointList = new ArrayList<Waypoint>();
+	private ArrayList<Waypoint> WaypointList = new ArrayList<Waypoint>();
+	public ArrayList<Waypoint> getWPTList(){
+		return WaypointList;
+	}
+
 }
