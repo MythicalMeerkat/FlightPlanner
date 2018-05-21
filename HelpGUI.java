@@ -1,6 +1,16 @@
-import java.awt.Dimension;
-import java.awt.EventQueue;
+/*
+ * Jeffrey A. Wilson
+ * Projectile Studios
+ * 
+ * 05/20/2018
+ * 
+ * HelpGUI.java (GUI)
+ * 
+ * This file creates the Help/FAQ GUI that gives users instructions on how to use the program in addiotion to addressing certain missing features.
+ * 
+ */
 
+import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -9,14 +19,11 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
 
 public class HelpGUI extends JFrame {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
+	private static final long serialVersionUID = 67L;
 	private JPanel contentPane;
 
 	public static void main(String[] args) {

@@ -1,3 +1,15 @@
+/*
+ * Jeffrey A. Wilson
+ * Projectile Studios
+ * 
+ * 05/20/2018
+ * 
+ * IntroScreen.java (GUI)
+ * 
+ * This file creates the simple intro screen that allows users to eighter create a new flight plan, or load an existing flight plan.
+ * 
+ */
+
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -14,10 +26,8 @@ import javax.swing.JLabel;
 
 public class IntroScreen extends JFrame {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+	
+	private static final long serialVersionUID = 67L;
 	private JPanel contentPane;
 	private JLabel txtWelcomeToThe;
 	private JLabel txtCreateANew;
