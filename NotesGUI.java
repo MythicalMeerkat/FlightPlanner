@@ -1,24 +1,29 @@
-import java.awt.EventQueue;
+/*
+ * Jeffrey A. Wilson
+ * Projectile Studios
+ * 
+ * 05/20/2018
+ * 
+ * NotesGUI.java (GUI)
+ * 
+ * This file creates the Note Taking/Loading GUI, allowing users to recod important information regarding their flight plan.
+ * 
+ */
 
+import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.StyledDocument;
-import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-
 import java.awt.event.ActionListener;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,7 +32,7 @@ import java.awt.event.ActionEvent;
 
 public class NotesGUI extends JFrame {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 67L;
 	private JPanel contentPane;
 	private static JFileChooser chooser;
 	private static JTextArea NotesTextBox;

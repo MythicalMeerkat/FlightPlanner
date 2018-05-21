@@ -1,5 +1,16 @@
-import java.awt.EventQueue;
+/*
+ * Jeffrey A. Wilson
+ * Projectile Studios
+ * 
+ * 05/20/2018
+ * 
+ * FlightPlannerWindow.java (GUI)
+ * 
+ * This file creates the GUI of the Main Flight Planner Window and uses FLightPlanData.java to populate the gui and reference the list of waypoints.
+ * 
+ */
 
+import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -14,148 +25,95 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.awt.event.ActionEvent;
-
-import java.util.ArrayList;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-import java.awt.Color;
 import javax.swing.ListSelectionModel;
-
 import java.text.DecimalFormat;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.UIManager;
-import javax.swing.JToolBar;
+import java.awt.Color;
 
 public class FlightPlannerWindow extends JFrame {
-
-	private static final long serialVersionUID = 1L;
-
-	private final DecimalFormat df = new DecimalFormat("#.##"); 
+	
+	private FlightPlanData MASTER_FLIGHT_PLAN = new FlightPlanData(); // Holds the FLight Plan with ALL Waypoints
+	
+	private static final long serialVersionUID = 67L; 
+	
+	private final DecimalFormat DF = new DecimalFormat("#.##"); 
 
 	ConversionData conversions = new ConversionData();
-	private static ArrayList<Waypoint> WaypointList = new ArrayList<Waypoint>();
 	
 	private JPanel contentPane;
 	private JLabel WaypointLabelTop;
 	private JLabel DistanceLabelTop;
 	
-
-	private final static Waypoint DUMMYWAYPOINT = new Waypoint(" "," "," "," "," "," "," ");
 	private BufferedWriter writer = null;
 	
 	private static JFileChooser chooser;
 	
-	private JTable table;
+	private JTable WaypointTable;
 	private JTextField SpeedInput;
 	private JTextField HeadingInput;
 	private JTextField AltitudeInput;
 	private JTextField DistanceInput;
 	private JTextField WPTNumberLabel;
-	private JLabel WarningLabel;
 	private JTextField InputDeleteWaypoint;
 	private JTextField TotalTimeField;
 	private JTextField TotalDistanceTextField;
 	
 	private int current_row = 0;
-	private double total_waypoint_time = 0;	
-	private double total_distance = 0;
-	
-	public void addWaypoint(Waypoint pass)
+
+/*
+    Function: DrawTable() (void)
+
+    Author(s): Jeff Wilson
+    05/20/18
+
+    NO PARAMETERS
+    Returns: nothing; creates the table and draws it on the user's window
+*/
+
+	private void DrawTable()
 	{
-		WaypointList.add(pass);
-	}
-	
-	// Used for Initializing the Table to prevent a runtime error
-	//TODO: Find a better method for this as it is extremely inefficient
-	
-	public void redrawTableNull()
-	{
-		table.setModel(new DefaultTableModel(
+		WaypointTable.setModel(new DefaultTableModel(
 				new Object[][] {
-					{0, null, null, null, null, null, null},
-					{1, null, null, null, null, null, null},
-					{2, null, null, null, null, null, null},
-					{3, null, null, null, null, null, null},
-					{4, null, null, null, null, null, null},
-					{5, null, null, null, null, null, null},
-					{6, null, null, null, null, null, null},
-					{7, null, null, null, null, null, null},
-					{8, null, null, null, null, null, null},
-					{9, null, null, null, null, null, null},
-					{10, null, null, null, null, null, null},
-					{11, null, null, null, null, null, null},
-					{12, null, null, null, null, null, null},
-					{13, null, null, null, null, null, null},
-					{14, null, null, null, null, null, null},
-					{15, null, null, null, null, null, null},
-					{16, null, null, null, null, null, null},
-					{17, null, null, null, null, null, null},
-					{18, null, null, null, null, null, null},
-					{19, null, null, null, null, null, null},
-					{20, null, null, null, null, null, null},
-					{21, null, null, null, null, null, null},
+					{0, MASTER_FLIGHT_PLAN.getWPT(0).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(0).getHDG(), MASTER_FLIGHT_PLAN.getWPT(0).getALT(), MASTER_FLIGHT_PLAN.getWPT(0).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(0).getETA(), MASTER_FLIGHT_PLAN.getWPT(0).getFPM()},
+					{1, MASTER_FLIGHT_PLAN.getWPT(1).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(1).getHDG(), MASTER_FLIGHT_PLAN.getWPT(1).getALT(), MASTER_FLIGHT_PLAN.getWPT(1).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(1).getETA(), MASTER_FLIGHT_PLAN.getWPT(1).getFPM()},
+					{2, MASTER_FLIGHT_PLAN.getWPT(2).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(2).getHDG(), MASTER_FLIGHT_PLAN.getWPT(2).getALT(), MASTER_FLIGHT_PLAN.getWPT(2).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(2).getETA(), MASTER_FLIGHT_PLAN.getWPT(2).getFPM()},
+					{3, MASTER_FLIGHT_PLAN.getWPT(3).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(3).getHDG(), MASTER_FLIGHT_PLAN.getWPT(3).getALT(), MASTER_FLIGHT_PLAN.getWPT(3).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(3).getETA(), MASTER_FLIGHT_PLAN.getWPT(3).getFPM()},
+					{4, MASTER_FLIGHT_PLAN.getWPT(4).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(4).getHDG(), MASTER_FLIGHT_PLAN.getWPT(4).getALT(), MASTER_FLIGHT_PLAN.getWPT(4).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(4).getETA(), MASTER_FLIGHT_PLAN.getWPT(4).getFPM()},
+					{5, MASTER_FLIGHT_PLAN.getWPT(5).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(5).getHDG(), MASTER_FLIGHT_PLAN.getWPT(5).getALT(), MASTER_FLIGHT_PLAN.getWPT(5).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(5).getETA(), MASTER_FLIGHT_PLAN.getWPT(5).getFPM()},
+					{6, MASTER_FLIGHT_PLAN.getWPT(6).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(6).getHDG(), MASTER_FLIGHT_PLAN.getWPT(6).getALT(), MASTER_FLIGHT_PLAN.getWPT(6).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(6).getETA(), MASTER_FLIGHT_PLAN.getWPT(6).getFPM()},
+					{7, MASTER_FLIGHT_PLAN.getWPT(7).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(7).getHDG(), MASTER_FLIGHT_PLAN.getWPT(7).getALT(), MASTER_FLIGHT_PLAN.getWPT(7).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(7).getETA(), MASTER_FLIGHT_PLAN.getWPT(7).getFPM()},
+					{8, MASTER_FLIGHT_PLAN.getWPT(8).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(8).getHDG(), MASTER_FLIGHT_PLAN.getWPT(8).getALT(), MASTER_FLIGHT_PLAN.getWPT(8).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(8).getETA(), MASTER_FLIGHT_PLAN.getWPT(8).getFPM()},
+					{9, MASTER_FLIGHT_PLAN.getWPT(9).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(9).getHDG(), MASTER_FLIGHT_PLAN.getWPT(9).getALT(), MASTER_FLIGHT_PLAN.getWPT(9).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(9).getETA(), MASTER_FLIGHT_PLAN.getWPT(9).getFPM()},
+					{10, MASTER_FLIGHT_PLAN.getWPT(10).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(10).getHDG(), MASTER_FLIGHT_PLAN.getWPT(10).getALT(), MASTER_FLIGHT_PLAN.getWPT(10).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(10).getETA(), MASTER_FLIGHT_PLAN.getWPT(10).getFPM()},
+					{11, MASTER_FLIGHT_PLAN.getWPT(11).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(11).getHDG(), MASTER_FLIGHT_PLAN.getWPT(11).getALT(), MASTER_FLIGHT_PLAN.getWPT(11).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(11).getETA(), MASTER_FLIGHT_PLAN.getWPT(11).getFPM()},
+					{12, MASTER_FLIGHT_PLAN.getWPT(12).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(12).getHDG(), MASTER_FLIGHT_PLAN.getWPT(12).getALT(), MASTER_FLIGHT_PLAN.getWPT(12).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(12).getETA(), MASTER_FLIGHT_PLAN.getWPT(12).getFPM()},
+					{13, MASTER_FLIGHT_PLAN.getWPT(13).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(13).getHDG(), MASTER_FLIGHT_PLAN.getWPT(13).getALT(), MASTER_FLIGHT_PLAN.getWPT(13).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(13).getETA(), MASTER_FLIGHT_PLAN.getWPT(13).getFPM()},
+					{14, MASTER_FLIGHT_PLAN.getWPT(14).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(14).getHDG(), MASTER_FLIGHT_PLAN.getWPT(14).getALT(), MASTER_FLIGHT_PLAN.getWPT(14).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(14).getETA(), MASTER_FLIGHT_PLAN.getWPT(14).getFPM()},
+					{15, MASTER_FLIGHT_PLAN.getWPT(15).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(15).getHDG(), MASTER_FLIGHT_PLAN.getWPT(15).getALT(), MASTER_FLIGHT_PLAN.getWPT(15).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(15).getETA(), MASTER_FLIGHT_PLAN.getWPT(15).getFPM()},
+					{16, MASTER_FLIGHT_PLAN.getWPT(16).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(16).getHDG(), MASTER_FLIGHT_PLAN.getWPT(16).getALT(), MASTER_FLIGHT_PLAN.getWPT(16).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(16).getETA(), MASTER_FLIGHT_PLAN.getWPT(16).getFPM()},
+					{17, MASTER_FLIGHT_PLAN.getWPT(17).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(17).getHDG(), MASTER_FLIGHT_PLAN.getWPT(17).getALT(), MASTER_FLIGHT_PLAN.getWPT(17).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(17).getETA(), MASTER_FLIGHT_PLAN.getWPT(17).getFPM()},
+					{18, MASTER_FLIGHT_PLAN.getWPT(18).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(18).getHDG(), MASTER_FLIGHT_PLAN.getWPT(18).getALT(), MASTER_FLIGHT_PLAN.getWPT(18).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(18).getETA(), MASTER_FLIGHT_PLAN.getWPT(18).getFPM()},
+					{19, MASTER_FLIGHT_PLAN.getWPT(19).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(19).getHDG(), MASTER_FLIGHT_PLAN.getWPT(19).getALT(), MASTER_FLIGHT_PLAN.getWPT(19).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(19).getETA(), MASTER_FLIGHT_PLAN.getWPT(19).getFPM()},
+					{20, MASTER_FLIGHT_PLAN.getWPT(20).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(20).getHDG(), MASTER_FLIGHT_PLAN.getWPT(20).getALT(), MASTER_FLIGHT_PLAN.getWPT(20).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(20).getETA(), MASTER_FLIGHT_PLAN.getWPT(20).getFPM()},
+					{21, MASTER_FLIGHT_PLAN.getWPT(21).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(21).getHDG(), MASTER_FLIGHT_PLAN.getWPT(21).getALT(), MASTER_FLIGHT_PLAN.getWPT(21).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(21).getETA(), MASTER_FLIGHT_PLAN.getWPT(21).getFPM()},
 				},
 				new String[] {
-					"New column", "New column", "New column", "New column", "New column", "New column", "New column"
+					"Waypoint", "Distance", "Heading", "Altitude", "Speed", "ETA", "Vert. Speed"
 				}
 			));
 		
-		table.getColumnModel().getColumn(0).setPreferredWidth(69);
-		table.getColumnModel().getColumn(1).setPreferredWidth(69);
-		table.getColumnModel().getColumn(2).setPreferredWidth(69);
-		table.getColumnModel().getColumn(3).setPreferredWidth(69);
-		table.getColumnModel().getColumn(4).setPreferredWidth(69);
-		table.getColumnModel().getColumn(5).setPreferredWidth(69);
-	}
-	
-	public void fillListNull()
-	{
-		for(int i = 0; i < 22; ++i)
-		{
-		    WaypointList.add(i, DUMMYWAYPOINT);
-		}
-	}
-	
-	public void redrawTable()
-	{
-		table.setModel(new DefaultTableModel(
-				new Object[][] {
-					{0, WaypointList.get(0).getDistToNext(), WaypointList.get(0).getHDG(), WaypointList.get(0).getALT(), WaypointList.get(0).getSpeed(), WaypointList.get(0).getETA(), WaypointList.get(0).getFPM()},
-					{1, WaypointList.get(1).getDistToNext(), WaypointList.get(1).getHDG(), WaypointList.get(1).getALT(), WaypointList.get(1).getSpeed(), WaypointList.get(1).getETA(), WaypointList.get(1).getFPM()},
-					{2, WaypointList.get(2).getDistToNext(), WaypointList.get(2).getHDG(), WaypointList.get(2).getALT(), WaypointList.get(2).getSpeed(), WaypointList.get(2).getETA(), WaypointList.get(2).getFPM()},
-					{3, WaypointList.get(3).getDistToNext(), WaypointList.get(3).getHDG(), WaypointList.get(3).getALT(), WaypointList.get(3).getSpeed(), WaypointList.get(3).getETA(), WaypointList.get(3).getFPM()},
-					{4, WaypointList.get(4).getDistToNext(), WaypointList.get(4).getHDG(), WaypointList.get(4).getALT(), WaypointList.get(4).getSpeed(), WaypointList.get(4).getETA(), WaypointList.get(4).getFPM()},
-					{5, WaypointList.get(5).getDistToNext(), WaypointList.get(5).getHDG(), WaypointList.get(5).getALT(), WaypointList.get(5).getSpeed(), WaypointList.get(5).getETA(), WaypointList.get(5).getFPM()},
-					{6, WaypointList.get(6).getDistToNext(), WaypointList.get(6).getHDG(), WaypointList.get(6).getALT(), WaypointList.get(6).getSpeed(), WaypointList.get(6).getETA(), WaypointList.get(6).getFPM()},
-					{7, WaypointList.get(7).getDistToNext(), WaypointList.get(7).getHDG(), WaypointList.get(7).getALT(), WaypointList.get(7).getSpeed(), WaypointList.get(7).getETA(), WaypointList.get(7).getFPM()},
-					{8, WaypointList.get(8).getDistToNext(), WaypointList.get(8).getHDG(), WaypointList.get(8).getALT(), WaypointList.get(8).getSpeed(), WaypointList.get(8).getETA(), WaypointList.get(8).getFPM()},
-					{9, WaypointList.get(9).getDistToNext(), WaypointList.get(9).getHDG(), WaypointList.get(9).getALT(), WaypointList.get(9).getSpeed(), WaypointList.get(9).getETA(), WaypointList.get(9).getFPM()},
-					{10, WaypointList.get(10).getDistToNext(), WaypointList.get(10).getHDG(), WaypointList.get(10).getALT(), WaypointList.get(10).getSpeed(), WaypointList.get(10).getETA(), WaypointList.get(10).getFPM()},
-					{11, WaypointList.get(11).getDistToNext(), WaypointList.get(11).getHDG(), WaypointList.get(11).getALT(), WaypointList.get(11).getSpeed(), WaypointList.get(11).getETA(), WaypointList.get(11).getFPM()},
-					{12, WaypointList.get(12).getDistToNext(), WaypointList.get(12).getHDG(), WaypointList.get(12).getALT(), WaypointList.get(12).getSpeed(), WaypointList.get(12).getETA(), WaypointList.get(12).getFPM()},
-					{13, WaypointList.get(13).getDistToNext(), WaypointList.get(13).getHDG(), WaypointList.get(13).getALT(), WaypointList.get(13).getSpeed(), WaypointList.get(13).getETA(), WaypointList.get(13).getFPM()},
-					{14, WaypointList.get(14).getDistToNext(), WaypointList.get(14).getHDG(), WaypointList.get(14).getALT(), WaypointList.get(14).getSpeed(), WaypointList.get(14).getETA(), WaypointList.get(14).getFPM()},
-					{15, WaypointList.get(15).getDistToNext(), WaypointList.get(15).getHDG(), WaypointList.get(15).getALT(), WaypointList.get(15).getSpeed(), WaypointList.get(15).getETA(), WaypointList.get(15).getFPM()},
-					{16, WaypointList.get(16).getDistToNext(), WaypointList.get(16).getHDG(), WaypointList.get(16).getALT(), WaypointList.get(16).getSpeed(), WaypointList.get(16).getETA(), WaypointList.get(16).getFPM()},
-					{17, WaypointList.get(17).getDistToNext(), WaypointList.get(17).getHDG(), WaypointList.get(17).getALT(), WaypointList.get(17).getSpeed(), WaypointList.get(17).getETA(), WaypointList.get(17).getFPM()},
-					{18, WaypointList.get(18).getDistToNext(), WaypointList.get(18).getHDG(), WaypointList.get(18).getALT(), WaypointList.get(18).getSpeed(), WaypointList.get(18).getETA(), WaypointList.get(18).getFPM()},
-					{19, WaypointList.get(19).getDistToNext(), WaypointList.get(19).getHDG(), WaypointList.get(19).getALT(), WaypointList.get(19).getSpeed(), WaypointList.get(19).getETA(), WaypointList.get(19).getFPM()},
-					{20, WaypointList.get(20).getDistToNext(), WaypointList.get(20).getHDG(), WaypointList.get(20).getALT(), WaypointList.get(20).getSpeed(), WaypointList.get(20).getETA(), WaypointList.get(20).getFPM()},
-					{21, WaypointList.get(21).getDistToNext(), WaypointList.get(21).getHDG(), WaypointList.get(21).getALT(), WaypointList.get(21).getSpeed(), WaypointList.get(21).getETA(), WaypointList.get(21).getFPM()},
-				},
-				new String[] {
-					"New column", "New column", "New column", "New column", "New column", "New column", "New column"
-				}
-			));
+		WaypointTable.getColumnModel().getColumn(0).setPreferredWidth(69);
+		WaypointTable.getColumnModel().getColumn(1).setPreferredWidth(69);
+		WaypointTable.getColumnModel().getColumn(2).setPreferredWidth(69);
+		WaypointTable.getColumnModel().getColumn(3).setPreferredWidth(69);
+		WaypointTable.getColumnModel().getColumn(4).setPreferredWidth(69);
+		WaypointTable.getColumnModel().getColumn(5).setPreferredWidth(69);
 		
-		table.getColumnModel().getColumn(0).setPreferredWidth(69);
-		table.getColumnModel().getColumn(1).setPreferredWidth(69);
-		table.getColumnModel().getColumn(2).setPreferredWidth(69);
-		table.getColumnModel().getColumn(3).setPreferredWidth(69);
-		table.getColumnModel().getColumn(4).setPreferredWidth(69);
-		table.getColumnModel().getColumn(5).setPreferredWidth(69);
-	}
+	}	
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -175,7 +133,7 @@ public class FlightPlannerWindow extends JFrame {
 	public FlightPlannerWindow() {
 		
 		chooser =  new JFileChooser();
-		fillListNull(); // NEEDED TO PREVENT A NULL BOUNDS EXCEPTION
+		chooser.setCurrentDirectory(new File(System.getProperty("user.home") + System.getProperty("file.separator")+ "Desktop"));
 		setResizable(false);
 		setTitle("Projectile\u2122 Flight Plan Summary ALPHA V 1.00");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -188,6 +146,7 @@ public class FlightPlannerWindow extends JFrame {
 		// Alerts user when attempting to delete non existent cell
 		
 		JLabel DeleteWarningLabel = new JLabel("");
+		DeleteWarningLabel.setForeground(Color.RED);
 		DeleteWarningLabel.setBounds(683, 302, 424, 14);
 		DeleteWarningLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(DeleteWarningLabel);
@@ -206,7 +165,7 @@ public class FlightPlannerWindow extends JFrame {
 		CreateWPTButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				DeleteWarningLabel.setText("");
-				if(current_row < 22)
+				if(current_row < MASTER_FLIGHT_PLAN.getMaxListSize())
 				{
 					if(CalculateEtaCheck.isSelected() == true)
 					{
@@ -215,36 +174,31 @@ public class FlightPlannerWindow extends JFrame {
 						if(current_row == 0  || Integer.parseInt(DistanceInput.getText()) == 0)
 						{
 						
-							Waypoint waypoint = new Waypoint((String.valueOf(current_row)),AltitudeInput.getText(),"0", SpeedInput.getText(),DistanceInput.getText(),"0",HeadingInput.getText());
-							WaypointList.add(current_row, waypoint);
+							MASTER_FLIGHT_PLAN.setWPT(current_row, new Waypoint((String.valueOf(current_row)),AltitudeInput.getText(),"0", SpeedInput.getText(),DistanceInput.getText(),"0",HeadingInput.getText()));
 						}
 						
 						else
 						{
-							String altDifference = String.valueOf((Double.parseDouble(AltitudeInput.getText()) - Double.parseDouble(WaypointList.get(current_row - 1).getALT())));
-							Waypoint waypoint = new Waypoint((String.valueOf(current_row)),AltitudeInput.getText(),conversions.calculateVertSpeed(altDifference, ETA), SpeedInput.getText(),DistanceInput.getText(),ETA,HeadingInput.getText());
-							WaypointList.add(current_row, waypoint);
-							total_waypoint_time += Double.parseDouble(ETA);
+							String altDifference = String.valueOf((Double.parseDouble(AltitudeInput.getText()) - Double.parseDouble(MASTER_FLIGHT_PLAN.getWPT(current_row - 1).getALT())));
+							MASTER_FLIGHT_PLAN.setWPT(current_row, new Waypoint((String.valueOf(current_row)),AltitudeInput.getText(),conversions.calculateVertSpeed(altDifference, ETA), SpeedInput.getText(),DistanceInput.getText(),ETA,HeadingInput.getText()));
 						}
 					}
 				
-				else
-				{
-					Waypoint waypoint = new Waypoint((String.valueOf(current_row)),AltitudeInput.getText(),"N/C", SpeedInput.getText(),DistanceInput.getText(),"N/C",HeadingInput.getText());
-					WaypointList.add(current_row, waypoint);
-				}
-				total_distance += Double.parseDouble(WaypointList.get(current_row).getDistToNext());
+					else
+					{
+						MASTER_FLIGHT_PLAN.setWPT(current_row, new Waypoint((String.valueOf(current_row)),AltitudeInput.getText(),"N/C", SpeedInput.getText(),DistanceInput.getText(),"N/C",HeadingInput.getText()));
+					}
+					
 				current_row++;
 				WPTNumberLabel.setText(String.valueOf((current_row)));
-				TotalTimeField.setText(String.valueOf(df.format((total_waypoint_time))));
-				TotalDistanceTextField.setText(String.valueOf(df.format(total_distance)));
-				redrawTable();
+				TotalTimeField.setText(String.valueOf(DF.format((MASTER_FLIGHT_PLAN.getTotalFlightTime()))));
+				TotalDistanceTextField.setText(String.valueOf(DF.format(MASTER_FLIGHT_PLAN.getTotalDistance())));
+				DrawTable();
+				
 				}
+				
 				else{
-					WarningLabel = new JLabel("");
-					WarningLabel.setBounds(754, 283, 353, 14);
-					contentPane.add(WarningLabel);
-					WarningLabel.setText("Too Many Waypoints!");
+					DeleteWarningLabel.setText("Maximum number of Waypoints Reached.");
 				}
 				
 			}
@@ -261,35 +215,32 @@ public class FlightPlannerWindow extends JFrame {
 				{
 					
 					DeleteWarningLabel.setText("");
-					total_waypoint_time -= Double.parseDouble(WaypointList.get(Integer.parseInt(InputDeleteWaypoint.getText())).getETA());
-					total_distance -= Double.parseDouble(WaypointList.get(Integer.parseInt(InputDeleteWaypoint.getText())).getDistToNext());
-					WaypointList.remove(Integer.parseInt(InputDeleteWaypoint.getText()));
-					TotalTimeField.setText(String.valueOf(df.format((total_waypoint_time))));
-					TotalDistanceTextField.setText(String.valueOf(df.format(total_distance)));
-					redrawTable();
+					MASTER_FLIGHT_PLAN.deleteWPT(Integer.parseInt(InputDeleteWaypoint.getText()));
+					TotalTimeField.setText(String.valueOf(DF.format((MASTER_FLIGHT_PLAN.getTotalFlightTime()))));
+					TotalDistanceTextField.setText(String.valueOf(DF.format(MASTER_FLIGHT_PLAN.getTotalDistance())));
+					DrawTable();
 					current_row--;
 					WPTNumberLabel.setText(String.valueOf(current_row));
 				}
 				else{
 					DeleteWarningLabel.setText("Cannot delete cell that does not exist.");
 				}
-
-				
 			}
 		});
 		contentPane.add(DeleteWaypointButton);
 		
-		// Will allow user to Save the flight plan
+		// Will allow user to Save the flight plan as a text file.
+		//TODO: Save flight plan as a proprietary file that can be used to load the table and other info.
 		
 		JButton SavePlanButton = new JButton("Save Flight Plan");
 		SavePlanButton.setEnabled(true);
 		SavePlanButton.setBounds(450, 419, 124, 23);
 		SavePlanButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				
+	
+				// SAVING AS A TEXT FILE
 				int returnVal = chooser.showSaveDialog(null);
 				File file = chooser.getSelectedFile();
-
 				if (returnVal == JFileChooser.APPROVE_OPTION)
 				{
 				    try
@@ -308,12 +259,12 @@ public class FlightPlannerWindow extends JFrame {
 				    	for( int waypoint = 0; waypoint < current_row; ++waypoint )
 				    	{
 				    		writer.write( String.valueOf(waypoint) + "                           ");
-				    		writer.write( WaypointList.get(waypoint).getDistToNext() + "                                         ");
-				    		writer.write( WaypointList.get(waypoint).getHDG() + "                                 ");
-				    		writer.write( WaypointList.get(waypoint).getALT() + "               ");
-				    		writer.write( WaypointList.get(waypoint).getSpeed() + "                     ");
-				    		writer.write( WaypointList.get(waypoint).getETA() + "                           ");
-				    		writer.write( WaypointList.get(waypoint).getFPM());
+				    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getDistToNext() + "                                         ");
+				    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getHDG() + "                                 ");
+				    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getALT() + "               ");
+				    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getSpeed() + "                     ");
+				    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getETA() + "                           ");
+				    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getFPM());
 				    		writer.newLine();
 				    		writer.write("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 				    		writer.newLine();
@@ -328,41 +279,45 @@ public class FlightPlannerWindow extends JFrame {
 				    dispose();
 				    }
 				}
+				
+				// SAVING AS A PROPIETARY FILE FOR LOADING THE APP
+				//TODO
 			}
 		});
 		contentPane.add(SavePlanButton);
 		
 		// Clears all data for user
 		
-		JButton ClearDataButton = new JButton("Reset All");
-		ClearDataButton.setBounds(20, 419, 118, 23);
-		ClearDataButton.addActionListener(new ActionListener() {
+		JButton ResetAllButton = new JButton("Reset All");
+		ResetAllButton.setBounds(20, 419, 118, 23);
+		ResetAllButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				DeleteWarningLabel.setText("");
+				MASTER_FLIGHT_PLAN.resetFlightData();
 				current_row = 0;
-				total_waypoint_time = 0;
-				TotalTimeField.setText(String.valueOf(df.format((total_waypoint_time))));
-				WPTNumberLabel.setText(String.valueOf((current_row)));
+				
+				TotalTimeField.setText(String.valueOf(DF.format((MASTER_FLIGHT_PLAN.getTotalFlightTime()))));
+				WPTNumberLabel.setText(String.valueOf((DF.format(MASTER_FLIGHT_PLAN.getTotalDistance()))));
 				SpeedInput.setText("0");
 				HeadingInput.setText("0");
 				AltitudeInput.setText("0");
 				DistanceInput.setText("0");
 				InputDeleteWaypoint.setText("0");
-				fillListNull();
-				table.validate();
-				redrawTableNull();
+				
+				WaypointTable.validate();
+				DrawTable();
 				
 			}
 		});
-		contentPane.add(ClearDataButton);
+		contentPane.add(ResetAllButton);
 		
 		// Display Table
 		
-		table = new JTable();
-		table.setBounds(20, 42, 653, 352);
-		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		redrawTableNull();
-		contentPane.add(table);
+		WaypointTable = new JTable();
+		WaypointTable.setBounds(20, 42, 653, 352);
+		WaypointTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		DrawTable();
+		contentPane.add(WaypointTable);
 		
 		// Displays Help Window
 		
@@ -513,13 +468,6 @@ public class FlightPlannerWindow extends JFrame {
 		WaypointNumberSode.setHorizontalAlignment(SwingConstants.RIGHT);
 		WaypointNumberSode.setBounds(839, 352, 80, 14);
 		contentPane.add(WaypointNumberSode);
-		
-		// Used to display relevant warnings to the user
-		
-		JLabel WarningLabel = new JLabel("");
-		WarningLabel.setBounds(683, 207, 434, 14);
-		WarningLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		contentPane.add(WarningLabel);
 		
 		// Outlines the fields for Deleting a Way-point
 		
