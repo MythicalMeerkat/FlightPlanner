@@ -26,24 +26,24 @@ Function: Waypoint() (OVERLOADED constructor)
 Author(s): Jeff Wilson
 05/20/18
 
-Parameters: (String) WaypointValue - The Waypoint Number in the List
-			(String) Alt - the altitude of the waypoint
-			(String) VertSpeed = the Vertical speed of needed to meet the waypoint given the current linear speed of the aircraft
-			(String) speed - the ground speed of the aircraft
-			(String) distnext - the distance from the previous waypoint to the current waypoint
-			(String) ETimeA - the ETA from the previous waypoint to the current waypoint
-			(String) HDG - the heading of the current waypoint relative to the prevoius waypoint
+Parameters: (String) WPTNumber - The Waypoint Number in the List
+			(String) Altitude - the altitude of the waypoint
+			(String) FPM = the Vertical speed of needed to meet the waypoint given the current linear speed of the aircraft
+			(String) Speed - the ground speed of the aircraft
+			(String) Distance - the distance from the previous waypoint to the current waypoint
+			(String) ETA - the ETA from the previous waypoint to the current waypoint
+			(String) Heading - the heading of the current waypoint relative to the prevoius waypoint
 Returns: nothing; sets the member variables of the class to the appropriate values in the function header.
 */
 
-	public Waypoint(String WayPointValue, String Alt, String VertSpeed, String speed, String distnext, String ETimeA, String HDG){
-		WPTNumber = WayPointValue;
-		Altitude = Alt;
-		FPM = VertSpeed;
-		Speed = speed;
-		Distance = distnext;
-		ETA = ETimeA;
-		Heading = HDG;
+	public Waypoint(String WPTNumber, String Altitude, String FPM, String Speed, String Distance, String ETA, String Heading){
+		this.WPTNumber = WPTNumber;
+		this.Altitude = Altitude;
+		this.FPM = FPM;
+		this.Speed = Speed;
+		this.Distance = Distance;
+		this.ETA = ETA;
+		this.Heading = Heading;
 	}
 	
 /*
@@ -52,7 +52,7 @@ Returns: nothing; sets the member variables of the class to the appropriate valu
 	Author(s): Jeff Wilson
 	05/20/18
 
-	Parameters: NONO
+	NO PARAMETERS
 	Returns: nothing; sets the member variables of the class to empty strings
 	*/
 	
@@ -94,6 +94,4 @@ Returns: nothing; sets the member variables of the class to the appropriate valu
 	{
 		return Heading;
 	}
-
-
 }

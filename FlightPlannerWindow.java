@@ -17,42 +17,41 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.awt.event.ActionEvent;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.ListSelectionModel;
 import java.text.DecimalFormat;
 import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
 import javax.swing.UIManager;
 import java.awt.Color;
+import java.awt.Toolkit;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JMenu;
+import javax.swing.border.LineBorder;
 
 public class FlightPlannerWindow extends JFrame {
 	
 	private FlightPlanData MASTER_FLIGHT_PLAN = new FlightPlanData(); // Holds the FLight Plan with ALL Waypoints
 	
-	private static final long serialVersionUID = 67L; 
+	public static final long serialVersionUID = 67L; 
 	
 	private final DecimalFormat DF = new DecimalFormat("#.##"); 
 
-	ConversionData conversions = new ConversionData();
+	private ConversionData conversions = new ConversionData();
 	
+	public static Data_IO_PACKER DataIO = new Data_IO_PACKER();
+
 	private JPanel contentPane;
 	private JLabel WaypointLabelTop;
 	private JLabel DistanceLabelTop;
 	
-	private BufferedWriter writer = null;
-	
-	private static JFileChooser chooser;
-	
 	private JTable WaypointTable;
+	
 	private JTextField SpeedInput;
 	private JTextField HeadingInput;
 	private JTextField AltitudeInput;
@@ -62,8 +61,38 @@ public class FlightPlannerWindow extends JFrame {
 	private JTextField TotalTimeField;
 	private JTextField TotalDistanceTextField;
 	
+	JLabel EditorWarningLabel = new JLabel("");
+	
 	private int current_row = 0;
+	
+/*
+    Function: setNewProject() (void)
 
+    Author(s): Jeff Wilson
+    05/21/18
+
+    NO PARAMETERS
+    Returns: nothing; resets all flight data and text areas to their original state.
+*/
+	
+	private void setNewProject()
+	{
+		EditorWarningLabel.setText("");
+		MASTER_FLIGHT_PLAN.resetFlightData();
+		current_row = 0;
+		
+		TotalTimeField.setText(String.valueOf(DF.format((MASTER_FLIGHT_PLAN.getTotalFlightTime()))));
+		WPTNumberLabel.setText(String.valueOf((DF.format(MASTER_FLIGHT_PLAN.getTotalDistance()))));
+		SpeedInput.setText("0");
+		HeadingInput.setText("0");
+		AltitudeInput.setText("0");
+		DistanceInput.setText("0");
+		InputDeleteWaypoint.setText("0");
+		
+		WaypointTable.validate();
+		DrawTable();
+	}
+	
 /*
     Function: DrawTable() (void)
 
@@ -73,9 +102,13 @@ public class FlightPlannerWindow extends JFrame {
     NO PARAMETERS
     Returns: nothing; creates the table and draws it on the user's window
 */
-
+	
 	private void DrawTable()
 	{
+		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+		centerRenderer.setHorizontalAlignment( JLabel.CENTER );
+		WaypointTable.setDefaultRenderer(String.class, centerRenderer);
+		
 		WaypointTable.setModel(new DefaultTableModel(
 				new Object[][] {
 					{0, MASTER_FLIGHT_PLAN.getWPT(0).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(0).getHDG(), MASTER_FLIGHT_PLAN.getWPT(0).getALT(), MASTER_FLIGHT_PLAN.getWPT(0).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(0).getETA(), MASTER_FLIGHT_PLAN.getWPT(0).getFPM()},
@@ -100,6 +133,14 @@ public class FlightPlannerWindow extends JFrame {
 					{19, MASTER_FLIGHT_PLAN.getWPT(19).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(19).getHDG(), MASTER_FLIGHT_PLAN.getWPT(19).getALT(), MASTER_FLIGHT_PLAN.getWPT(19).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(19).getETA(), MASTER_FLIGHT_PLAN.getWPT(19).getFPM()},
 					{20, MASTER_FLIGHT_PLAN.getWPT(20).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(20).getHDG(), MASTER_FLIGHT_PLAN.getWPT(20).getALT(), MASTER_FLIGHT_PLAN.getWPT(20).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(20).getETA(), MASTER_FLIGHT_PLAN.getWPT(20).getFPM()},
 					{21, MASTER_FLIGHT_PLAN.getWPT(21).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(21).getHDG(), MASTER_FLIGHT_PLAN.getWPT(21).getALT(), MASTER_FLIGHT_PLAN.getWPT(21).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(21).getETA(), MASTER_FLIGHT_PLAN.getWPT(21).getFPM()},
+					{22, MASTER_FLIGHT_PLAN.getWPT(22).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(22).getHDG(), MASTER_FLIGHT_PLAN.getWPT(22).getALT(), MASTER_FLIGHT_PLAN.getWPT(22).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(22).getETA(), MASTER_FLIGHT_PLAN.getWPT(22).getFPM()},
+					{23, MASTER_FLIGHT_PLAN.getWPT(23).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(23).getHDG(), MASTER_FLIGHT_PLAN.getWPT(23).getALT(), MASTER_FLIGHT_PLAN.getWPT(23).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(23).getETA(), MASTER_FLIGHT_PLAN.getWPT(23).getFPM()},
+					{24, MASTER_FLIGHT_PLAN.getWPT(24).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(24).getHDG(), MASTER_FLIGHT_PLAN.getWPT(24).getALT(), MASTER_FLIGHT_PLAN.getWPT(24).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(24).getETA(), MASTER_FLIGHT_PLAN.getWPT(24).getFPM()},
+					{25, MASTER_FLIGHT_PLAN.getWPT(25).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(25).getHDG(), MASTER_FLIGHT_PLAN.getWPT(25).getALT(), MASTER_FLIGHT_PLAN.getWPT(25).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(25).getETA(), MASTER_FLIGHT_PLAN.getWPT(25).getFPM()},
+					{26, MASTER_FLIGHT_PLAN.getWPT(26).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(26).getHDG(), MASTER_FLIGHT_PLAN.getWPT(26).getALT(), MASTER_FLIGHT_PLAN.getWPT(26).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(26).getETA(), MASTER_FLIGHT_PLAN.getWPT(26).getFPM()},
+					{27, MASTER_FLIGHT_PLAN.getWPT(27).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(27).getHDG(), MASTER_FLIGHT_PLAN.getWPT(27).getALT(), MASTER_FLIGHT_PLAN.getWPT(27).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(27).getETA(), MASTER_FLIGHT_PLAN.getWPT(27).getFPM()},
+					{28, MASTER_FLIGHT_PLAN.getWPT(28).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(28).getHDG(), MASTER_FLIGHT_PLAN.getWPT(28).getALT(), MASTER_FLIGHT_PLAN.getWPT(28).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(28).getETA(), MASTER_FLIGHT_PLAN.getWPT(28).getFPM()},
+					{29, MASTER_FLIGHT_PLAN.getWPT(29).getDistToNext(), MASTER_FLIGHT_PLAN.getWPT(29).getHDG(), MASTER_FLIGHT_PLAN.getWPT(29).getALT(), MASTER_FLIGHT_PLAN.getWPT(29).getSpeed(), MASTER_FLIGHT_PLAN.getWPT(29).getETA(), MASTER_FLIGHT_PLAN.getWPT(29).getFPM()},
 				},
 				new String[] {
 					"Waypoint", "Distance", "Heading", "Altitude", "Speed", "ETA", "Vert. Speed"
@@ -131,29 +172,88 @@ public class FlightPlannerWindow extends JFrame {
 	}
 	
 	public FlightPlannerWindow() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Jeffrey\\Desktop\\FlightPlanner\\SOURCE\\AeroNavigationPlanner\\src\\FlightPlannerICON.png"));
 		
-		chooser =  new JFileChooser();
-		chooser.setCurrentDirectory(new File(System.getProperty("user.home") + System.getProperty("file.separator")+ "Desktop"));
 		setResizable(false);
-		setTitle("Projectile\u2122 Flight Plan Summary ALPHA V 1.00");
+		setTitle("Flight Plan Summary ");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1123, 576);
+		
+		JMenuBar menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+		
+		JMenu mnFile = new JMenu("File");
+		mnFile.setHorizontalAlignment(SwingConstants.CENTER);
+		menuBar.add(mnFile);
+		
+		JMenuItem mntmExit = new JMenuItem("Exit");
+		mntmExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		});
+		
+		JMenuItem mntmNewProject = new JMenuItem("New Project");
+		mntmNewProject.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setNewProject();
+			}
+		});
+		mnFile.add(mntmNewProject);
+		
+		JMenuItem mntmSaveProject = new JMenuItem("Save Project");
+		mntmSaveProject.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		mnFile.add(mntmSaveProject);
+		
+		JMenuItem mntmExportPlan = new JMenuItem("Export...");
+		mntmExportPlan.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DataIO.writeOutTextFile(MASTER_FLIGHT_PLAN, current_row, MASTER_FLIGHT_PLAN.getTotalDistance(), MASTER_FLIGHT_PLAN.getTotalFlightTime());
+			}
+		});
+		mntmExportPlan.setHorizontalAlignment(SwingConstants.LEFT);
+		mnFile.add(mntmExportPlan);
+		mnFile.add(mntmExit);
+		
+		JMenu mnTools = new JMenu("Tools");
+		menuBar.add(mnTools);
+		
+		JMenuItem mntmNotes = new JMenuItem("Notes");
+		mntmNotes.setHorizontalAlignment(SwingConstants.CENTER);
+		mntmNotes.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				NotesGUI Notes_GUI_Frame = new NotesGUI();
+				Notes_GUI_Frame.setAlwaysOnTop(true);
+				Notes_GUI_Frame.setVisible(true);;
+			}
+		});
+		mnTools.add(mntmNotes);
+		
+		JMenu mnHelp = new JMenu("Help");
+		menuBar.add(mnHelp);
+		
+		JMenuItem mntmUserGuide = new JMenuItem("User Guide");
+		mntmUserGuide.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				HelpGUI Help_GUI_Frame = new HelpGUI();
+				Help_GUI_Frame.setAlwaysOnTop(true);
+				Help_GUI_Frame.setVisible(true);
+			}
+		});
+		mnHelp.add(mntmUserGuide);
 		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-		
-		// Alerts user when attempting to delete non existent cell
-		
-		JLabel DeleteWarningLabel = new JLabel("");
-		DeleteWarningLabel.setForeground(Color.RED);
-		DeleteWarningLabel.setBounds(683, 302, 424, 14);
-		DeleteWarningLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		contentPane.add(DeleteWarningLabel);
-		
+				
 		// Determines of the ETA is calculate for current way-point
 		
 		JCheckBox CalculateEtaCheck = new JCheckBox("Calculate Vert. Speed/ETA");
+		CalculateEtaCheck.setToolTipText("Unchecking this box sets the ETA and Vertical Speed to \"N/C\"");
 		CalculateEtaCheck.setBounds(839, 177, 218, 23);
 		CalculateEtaCheck.setSelected(true);
 		contentPane.add(CalculateEtaCheck);
@@ -161,15 +261,16 @@ public class FlightPlannerWindow extends JFrame {
 		// Create the Way-point
 		
 		JButton CreateWPTButton = new JButton("Add Waypoint");
-		CreateWPTButton.setBounds(20, 485, 118, 23);
+		CreateWPTButton.setToolTipText("Adds a waypoint with the data entered under the 'Waypoint Creation' section");
+		CreateWPTButton.setBounds(960, 485, 132, 23);
 		CreateWPTButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				DeleteWarningLabel.setText("");
+				EditorWarningLabel.setText("");
 				if(current_row < MASTER_FLIGHT_PLAN.getMaxListSize())
 				{
-					if(CalculateEtaCheck.isSelected() == true)
+					if(CalculateEtaCheck.isSelected())
 					{
-						String ETA = conversions.calculateETA(DistanceInput.getText(),SpeedInput.getText());
+						String ETA = conversions.calculateETA(DistanceInput.getText(), SpeedInput.getText());
 
 						if(current_row == 0  || Integer.parseInt(DistanceInput.getText()) == 0)
 						{
@@ -198,7 +299,7 @@ public class FlightPlannerWindow extends JFrame {
 				}
 				
 				else{
-					DeleteWarningLabel.setText("Maximum number of Waypoints Reached.");
+					EditorWarningLabel.setText("Maximum number of Waypoints Reached.");
 				}
 				
 			}
@@ -207,14 +308,15 @@ public class FlightPlannerWindow extends JFrame {
 		
 		// Delete a way-point
 		
-		JButton DeleteWaypointButton = new JButton("Delete Waypoint");
-		DeleteWaypointButton.setBounds(229, 485, 132, 23);
-		DeleteWaypointButton.addActionListener(new ActionListener() {
+		JButton DeleteWPTButton = new JButton("Delete Waypoint");
+		DeleteWPTButton.setToolTipText("Deletes the corresponding Waypoint to the entry under the section 'Waypoint Deletion'");
+		DeleteWPTButton.setBounds(782, 485, 132, 23);
+		DeleteWPTButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if( (!(InputDeleteWaypoint.getText().isEmpty() )) && Integer.parseInt(InputDeleteWaypoint.getText()) >= 0 && Integer.parseInt(InputDeleteWaypoint.getText()) < current_row )
 				{
 					
-					DeleteWarningLabel.setText("");
+					EditorWarningLabel.setText("");
 					MASTER_FLIGHT_PLAN.deleteWPT(Integer.parseInt(InputDeleteWaypoint.getText()));
 					TotalTimeField.setText(String.valueOf(DF.format((MASTER_FLIGHT_PLAN.getTotalFlightTime()))));
 					TotalDistanceTextField.setText(String.valueOf(DF.format(MASTER_FLIGHT_PLAN.getTotalDistance())));
@@ -223,127 +325,22 @@ public class FlightPlannerWindow extends JFrame {
 					WPTNumberLabel.setText(String.valueOf(current_row));
 				}
 				else{
-					DeleteWarningLabel.setText("Cannot delete cell that does not exist.");
+					EditorWarningLabel.setText("Cannot delete cell that does not exist.");
 				}
 			}
 		});
-		contentPane.add(DeleteWaypointButton);
-		
-		// Will allow user to Save the flight plan as a text file.
-		//TODO: Save flight plan as a proprietary file that can be used to load the table and other info.
-		
-		JButton SavePlanButton = new JButton("Save Flight Plan");
-		SavePlanButton.setEnabled(true);
-		SavePlanButton.setBounds(450, 419, 124, 23);
-		SavePlanButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-	
-				// SAVING AS A TEXT FILE
-				int returnVal = chooser.showSaveDialog(null);
-				File file = chooser.getSelectedFile();
-				if (returnVal == JFileChooser.APPROVE_OPTION)
-				{
-				    try
-				    {
-						writer = new BufferedWriter( new FileWriter( file.getAbsolutePath() + ".txt" ));
-						writer.write("Flight Plan Name: ");
-						writer.newLine();
-						writer.newLine();
-						writer.newLine();
-						writer.newLine();
-						writer.write("Waypoint | " + "Distance from Previous | " + "HDG from Previous | " + "Altitude | " + "Speed | " + "E.T.A. from Previous | " + "Vertical Speed(FPM) |");
-						writer.newLine();
-						writer.write("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
-						writer.newLine();
-						
-				    	for( int waypoint = 0; waypoint < current_row; ++waypoint )
-				    	{
-				    		writer.write( String.valueOf(waypoint) + "                           ");
-				    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getDistToNext() + "                                         ");
-				    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getHDG() + "                                 ");
-				    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getALT() + "               ");
-				    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getSpeed() + "                     ");
-				    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getETA() + "                           ");
-				    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getFPM());
-				    		writer.newLine();
-				    		writer.write("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
-				    		writer.newLine();
-				    	}
-				    	writer.newLine();
-				    	writer.write("Notes: ");
-				    	writer.close( );
-				    }
-				    catch (IOException e1)
-				    {
-				    JOptionPane.showMessageDialog(null, "ERROR: Could not be saved!", "InfoBox: " + "ERROR", JOptionPane.INFORMATION_MESSAGE);
-				    dispose();
-				    }
-				}
-				
-				// SAVING AS A PROPIETARY FILE FOR LOADING THE APP
-				//TODO
-			}
-		});
-		contentPane.add(SavePlanButton);
-		
-		// Clears all data for user
-		
-		JButton ResetAllButton = new JButton("Reset All");
-		ResetAllButton.setBounds(20, 419, 118, 23);
-		ResetAllButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				DeleteWarningLabel.setText("");
-				MASTER_FLIGHT_PLAN.resetFlightData();
-				current_row = 0;
-				
-				TotalTimeField.setText(String.valueOf(DF.format((MASTER_FLIGHT_PLAN.getTotalFlightTime()))));
-				WPTNumberLabel.setText(String.valueOf((DF.format(MASTER_FLIGHT_PLAN.getTotalDistance()))));
-				SpeedInput.setText("0");
-				HeadingInput.setText("0");
-				AltitudeInput.setText("0");
-				DistanceInput.setText("0");
-				InputDeleteWaypoint.setText("0");
-				
-				WaypointTable.validate();
-				DrawTable();
-				
-			}
-		});
-		contentPane.add(ResetAllButton);
+		contentPane.add(DeleteWPTButton);
 		
 		// Display Table
 		
 		WaypointTable = new JTable();
-		WaypointTable.setBounds(20, 42, 653, 352);
+		WaypointTable.setBorder(new LineBorder(new Color(0, 0, 0)));
+		WaypointTable.setRowSelectionAllowed(false);
+		WaypointTable.setBounds(20, 35, 665, 480);
 		WaypointTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		DrawTable();
 		contentPane.add(WaypointTable);
 		
-		// Displays Help Window
-		
-		JButton HelpButton = new JButton("Help");
-		HelpButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				HelpGUI Help_GUI_Frame = new HelpGUI();
-				Help_GUI_Frame.setAlwaysOnTop(true);
-				Help_GUI_Frame.setVisible(true);
-			}
-		});
-		HelpButton.setBounds(450, 485, 124, 23);
-		contentPane.add(HelpButton);
-		
-		// Displays the Notes Window
-		
-		JButton NotesButton = new JButton("Notes");
-		NotesButton.setBounds(229, 419, 132, 23);
-		NotesButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				NotesGUI Notes_GUI_Frame = new NotesGUI();
-				Notes_GUI_Frame.setAlwaysOnTop(true);
-				Notes_GUI_Frame.setVisible(true);;
-			}
-		});
-		contentPane.add(NotesButton);
 		
 		// TOP Column Labels
 		
@@ -354,7 +351,7 @@ public class FlightPlannerWindow extends JFrame {
 		contentPane.add(WaypointLabelTop);
 				
 		DistanceLabelTop = new JLabel();
-		DistanceLabelTop.setBounds(109, 11, 86, 20);
+		DistanceLabelTop.setBounds(117, 11, 86, 20);
 		DistanceLabelTop.setHorizontalAlignment(SwingConstants.CENTER);
 		DistanceLabelTop.setText("Distance(NM)");
 		contentPane.add(DistanceLabelTop);
@@ -365,7 +362,7 @@ public class FlightPlannerWindow extends JFrame {
 		contentPane.add(HDGLabelTop);
 				
 		JLabel AltLabelTop = new JLabel("Altitude");
-		AltLabelTop.setBounds(315, 14, 46, 14);
+		AltLabelTop.setBounds(324, 14, 46, 14);
 		AltLabelTop.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(AltLabelTop);
 				
@@ -375,21 +372,24 @@ public class FlightPlannerWindow extends JFrame {
 		contentPane.add(SpeedLabelTop);
 				
 		JLabel ETALabelTop = new JLabel("ETA(MIN)");
-		ETALabelTop.setBounds(495, 14, 68, 14);
+		ETALabelTop.setToolTipText("The estimated time taken to reach a Waypoint from the previous Waypoint");
+		ETALabelTop.setBounds(503, 14, 68, 14);
 		ETALabelTop.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(ETALabelTop);
 				
 		JLabel VSLabelTop = new JLabel("Vert. Speed(FPM)");
+		VSLabelTop.setToolTipText("The estimated vertical speed needed to reach the Waypoint from the prevoius Waypoint");
 		VSLabelTop.setBounds(581, 14, 104, 14);
 		VSLabelTop.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(VSLabelTop);
 				
-		JLabel NotesLabelTop = new JLabel("Waypoint Creation");
-		NotesLabelTop.setBounds(853, 14, 110, 14);
-		NotesLabelTop.setHorizontalAlignment(SwingConstants.CENTER);
-		contentPane.add(NotesLabelTop);		
+		JLabel WaypointCreationTOP = new JLabel("Waypoint Creation");
+		WaypointCreationTOP.setForeground(Color.BLUE);
+		WaypointCreationTOP.setBounds(875, 14, 110, 14);
+		WaypointCreationTOP.setHorizontalAlignment(SwingConstants.CENTER);
+		contentPane.add(WaypointCreationTOP);		
 				
-		JLabel SpeedLabelCreate = new JLabel("Speed(KIAS):");
+		JLabel SpeedLabelCreate = new JLabel("Speed(KNOTS):");
 		SpeedLabelCreate.setBounds(822, 42, 97, 14);
 		SpeedLabelCreate.setHorizontalAlignment(SwingConstants.RIGHT);
 		contentPane.add(SpeedLabelCreate);
@@ -399,19 +399,20 @@ public class FlightPlannerWindow extends JFrame {
 		HeadingLabelCreate.setHorizontalAlignment(SwingConstants.RIGHT);
 		contentPane.add(HeadingLabelCreate);
 				
-		JLabel AltitudeLabelSide = new JLabel("Altitude(FT):");
-		AltitudeLabelSide.setBounds(849, 107, 70, 14);
-		AltitudeLabelSide.setHorizontalAlignment(SwingConstants.RIGHT);
-		contentPane.add(AltitudeLabelSide);
+		JLabel AltitudeLabelCreate = new JLabel("Altitude(FT):");
+		AltitudeLabelCreate.setBounds(849, 107, 70, 14);
+		AltitudeLabelCreate.setHorizontalAlignment(SwingConstants.RIGHT);
+		contentPane.add(AltitudeLabelCreate);
 				
-		JLabel DistanceLabelSide = new JLabel("Distance(NM):");
-		DistanceLabelSide.setBounds(833, 146, 86, 14);
-		DistanceLabelSide.setHorizontalAlignment(SwingConstants.RIGHT);
-		contentPane.add(DistanceLabelSide);
+		JLabel DistanceLabelCreate = new JLabel("Distance(NM):");
+		DistanceLabelCreate.setBounds(833, 146, 86, 14);
+		DistanceLabelCreate.setHorizontalAlignment(SwingConstants.RIGHT);
+		contentPane.add(DistanceLabelCreate);
 		
 		// Way-point Data input fields
 		
 		SpeedInput = new JTextField();
+		SpeedInput.setToolTipText("Ground Speed of Aircraft");
 		SpeedInput.setBounds(929, 39, 86, 20);
 		SpeedInput.setHorizontalAlignment(SwingConstants.CENTER);
 		SpeedInput.setText("0");
@@ -419,6 +420,7 @@ public class FlightPlannerWindow extends JFrame {
 		SpeedInput.setColumns(10);
 		
 		HeadingInput = new JTextField();
+		HeadingInput.setToolTipText("Heading taken to reach this Waypoint from the Previous Waypoint");
 		HeadingInput.setBounds(929, 70, 86, 20);
 		HeadingInput.setHorizontalAlignment(SwingConstants.CENTER);
 		HeadingInput.setText("0");
@@ -426,6 +428,7 @@ public class FlightPlannerWindow extends JFrame {
 		HeadingInput.setColumns(10);
 		
 		AltitudeInput = new JTextField();
+		AltitudeInput.setToolTipText("Height above ground level (AGL)");
 		AltitudeInput.setBounds(929, 104, 86, 20);
 		AltitudeInput.setHorizontalAlignment(SwingConstants.CENTER);
 		AltitudeInput.setText("0");
@@ -433,6 +436,7 @@ public class FlightPlannerWindow extends JFrame {
 		AltitudeInput.setColumns(10);
 		
 		DistanceInput = new JTextField();
+		DistanceInput.setToolTipText("The Distance from the Previous Waypoint");
 		DistanceInput.setBounds(929, 140, 86, 20);
 		DistanceInput.setHorizontalAlignment(SwingConstants.CENTER);
 		DistanceInput.setText("0");
@@ -440,6 +444,7 @@ public class FlightPlannerWindow extends JFrame {
 		DistanceInput.setColumns(10);
 		
 		WPTNumberLabel = new JTextField();
+		WPTNumberLabel.setToolTipText("The current Waypoint being edited");
 		WPTNumberLabel.setBounds(929, 349, 86, 20);
 		WPTNumberLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		WPTNumberLabel.setText(String.valueOf((current_row)));
@@ -448,13 +453,15 @@ public class FlightPlannerWindow extends JFrame {
 		contentPane.add(WPTNumberLabel);
 		
 		InputDeleteWaypoint = new JTextField();
-		InputDeleteWaypoint.setBounds(929, 274, 86, 20);
+		InputDeleteWaypoint.setToolTipText("The Waypoint to be deleted. Push the 'Delete Waypoint' button to remove the Waypoint");
+		InputDeleteWaypoint.setBounds(929, 260, 86, 20);
 		InputDeleteWaypoint.setHorizontalAlignment(SwingConstants.CENTER);
 		InputDeleteWaypoint.setText("0");
 		contentPane.add(InputDeleteWaypoint);
 		InputDeleteWaypoint.setColumns(10);
 		
 		TotalTimeField = new JTextField();
+		TotalTimeField.setToolTipText("Estimated time to Complete the flight plan");
 		TotalTimeField.setEditable(false);
 		TotalTimeField.setHorizontalAlignment(SwingConstants.CENTER);
 		TotalTimeField.setText("0");
@@ -464,44 +471,48 @@ public class FlightPlannerWindow extends JFrame {
 		
 		// Displays Current Way-point the User is editing
 		
-		JLabel WaypointNumberSode = new JLabel("Current WPT:");
-		WaypointNumberSode.setHorizontalAlignment(SwingConstants.RIGHT);
-		WaypointNumberSode.setBounds(839, 352, 80, 14);
-		contentPane.add(WaypointNumberSode);
+		JLabel CurrentWPTLabel = new JLabel("Current WPT:");
+		CurrentWPTLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		CurrentWPTLabel.setBounds(839, 352, 80, 14);
+		contentPane.add(CurrentWPTLabel);
 		
 		// Outlines the fields for Deleting a Way-point
 		
-		JLabel lblWaypointDeletion = new JLabel("Waypoint Deletion");
-		lblWaypointDeletion.setBounds(853, 244, 132, 14);
-		lblWaypointDeletion.setHorizontalAlignment(SwingConstants.CENTER);
-		contentPane.add(lblWaypointDeletion);
+		JLabel DeleteWPTTop = new JLabel("Waypoint Deletion");
+		DeleteWPTTop.setForeground(Color.BLUE);
+		DeleteWPTTop.setBounds(863, 231, 132, 14);
+		DeleteWPTTop.setHorizontalAlignment(SwingConstants.CENTER);
+		contentPane.add(DeleteWPTTop);
 		
 		// Label for directly deleting way-point
 		
-		JLabel lblDeleteWaypoint = new JLabel("Delete WPT:");
-		lblDeleteWaypoint.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblDeleteWaypoint.setBounds(822, 277, 97, 14);
-		contentPane.add(lblDeleteWaypoint);
+		JLabel DeleteWPTLabel = new JLabel("Delete WPT:");
+		DeleteWPTLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		DeleteWPTLabel.setBounds(817, 263, 97, 14);
+		contentPane.add(DeleteWPTLabel);
 		
 		// Outlines fields for the overall info regarding the flight plan
 		
-		JLabel PlanInfo = new JLabel("Plan Info");
-		PlanInfo.setBounds(897, 327, 88, 14);
-		contentPane.add(PlanInfo);
+		JLabel PlanInfoTOP = new JLabel("Plan Info");
+		PlanInfoTOP.setHorizontalAlignment(SwingConstants.CENTER);
+		PlanInfoTOP.setForeground(Color.BLUE);
+		PlanInfoTOP.setBounds(885, 327, 88, 14);
+		contentPane.add(PlanInfoTOP);
 		
 		// Labels the field showing the total time of the flight plan
 		
-		JLabel LabelTotalTime = new JLabel("Total Time:");
-		LabelTotalTime.setHorizontalAlignment(SwingConstants.RIGHT);
-		LabelTotalTime.setBounds(839, 380, 80, 14);
-		contentPane.add(LabelTotalTime);
+		JLabel TotalTimeLabel = new JLabel("Total Time:");
+		TotalTimeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		TotalTimeLabel.setBounds(839, 380, 80, 14);
+		contentPane.add(TotalTimeLabel);
 		
-		JLabel lblTotalDistance = new JLabel("Total Distance(NM):");
-		lblTotalDistance.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblTotalDistance.setBounds(801, 409, 118, 14);
-		contentPane.add(lblTotalDistance);
+		JLabel TotalDistanceLabel = new JLabel("Total Distance(NM):");
+		TotalDistanceLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		TotalDistanceLabel.setBounds(801, 409, 118, 14);
+		contentPane.add(TotalDistanceLabel);
 		
 		TotalDistanceTextField = new JTextField();
+		TotalDistanceTextField.setToolTipText("Estimated Total distance covered by the Flight Plan");
 		TotalDistanceTextField.setHorizontalAlignment(SwingConstants.CENTER);
 		TotalDistanceTextField.setText("0");
 		TotalDistanceTextField.setEditable(false);
@@ -509,13 +520,11 @@ public class FlightPlannerWindow extends JFrame {
 		contentPane.add(TotalDistanceTextField);
 		TotalDistanceTextField.setColumns(10);
 		
-		JLabel lblCreatedBy = new JLabel("Created By: ");
-		lblCreatedBy.setBounds(822, 494, 68, 14);
-		contentPane.add(lblCreatedBy);
 		
-		JLabel lblJeffreyAWilson = new JLabel("Jeffrey A. Wilson");
-		lblJeffreyAWilson.setBounds(917, 494, 98, 14);
-		contentPane.add(lblJeffreyAWilson);
+		EditorWarningLabel.setForeground(Color.RED);
+		EditorWarningLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		EditorWarningLabel.setBounds(782, 453, 325, 14);
+		contentPane.add(EditorWarningLabel);
 		
 	
 	}

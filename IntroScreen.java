@@ -24,21 +24,31 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 
+import java.awt.Toolkit;
+
 public class IntroScreen extends JFrame {
 
 	
-	private static final long serialVersionUID = 67L;
+	private static final long serialVersionUID = FlightPlannerWindow.serialVersionUID;
 	private JPanel contentPane;
 	private JLabel txtWelcomeToThe;
 	private JLabel txtCreateANew;
 	private JLabel txtLoadAnExisting;
+	
+	@SuppressWarnings("unused")
+	private Data_IO_PACKER Data_LOADER;
 
 	// Create the Frame
 	public IntroScreen() {
+		try {
+			setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Jeffrey\\Desktop\\FlightPlanner\\SOURCE\\AeroNavigationPlanner\\src\\FlightPlannerICON.png"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		setResizable(false);
 		setBackground(Color.WHITE);
-		setTitle("Projectile\u2122 Flight Planner ALPHA V 1.00");
+		setTitle("Flight Planner ");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		
@@ -58,7 +68,7 @@ public class IntroScreen extends JFrame {
 		txtWelcomeToThe.setForeground(Color.BLACK);
 		txtWelcomeToThe.setBackground(Color.LIGHT_GRAY);
 		txtWelcomeToThe.setHorizontalAlignment(SwingConstants.CENTER);
-		txtWelcomeToThe.setText("Welcome to the Projectile™ Flight Planner");
+		txtWelcomeToThe.setText("Welcome to the Projectile Studios Flight Planner");
 		GridBagConstraints gbc_txtWelcomeToThe = new GridBagConstraints();
 		gbc_txtWelcomeToThe.anchor = GridBagConstraints.NORTH;
 		gbc_txtWelcomeToThe.insets = new Insets(0, 0, 5, 0);
@@ -92,6 +102,7 @@ public class IntroScreen extends JFrame {
 		contentPane.add(txtLoadAnExisting, gbc_txtLoadAnExisting);
 		
 		JButton btnCreate = new JButton("Create");
+		btnCreate.setToolTipText("Create a new Flight Plan");
 		btnCreate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				FlightPlannerWindow PlannerWindow = new FlightPlannerWindow();
@@ -107,6 +118,7 @@ public class IntroScreen extends JFrame {
 		contentPane.add(btnCreate, gbc_btnCreate);
 		
 		JButton btnLoad = new JButton("Load");
+		btnLoad.setToolTipText("Load a FlightPlan (.fpp) (NOT YET AVAILABLE)");
 		btnLoad.setEnabled(false);
 		btnLoad.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {

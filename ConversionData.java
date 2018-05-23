@@ -37,7 +37,7 @@ public class ConversionData {
 	
 /*
     Function: calculateVertSpeed() (String)
-
+    
     Author(s): Jeff Wilson
     05/20/18
 
