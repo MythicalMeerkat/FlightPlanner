@@ -18,10 +18,9 @@ public class FlightPlanData {
 	
 	private final static Waypoint DUMMYWAYPOINT = new Waypoint();
 	
-	private final int MAX_LIST_SIZE = 22;
+	private final int MAX_LIST_SIZE = 30; // (ROWS + 1)
 	
 	private double total_distance = 0;
-	
 	private double total_flight_plan_time = 0;
 
 /*
@@ -187,7 +186,7 @@ public class FlightPlanData {
     05/21/18
 
     NO PARAMETERS
-    Returns: the MAXIMUM amount of waypoints the flight plan can contain to the calling routine
+    Returns: the MAXIMUM amount of waypoints the flight plan can contain
 */	
 
 	public final int getMaxListSize()
