@@ -2,7 +2,7 @@
  * Jeffrey A. Wilson
  * Projectile Studios
  * 
- * 05/20/2018
+ * Created: 05/20/2018
  * 
  * HelpGUI.java (GUI)
  * 

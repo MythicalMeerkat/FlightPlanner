@@ -2,7 +2,7 @@
  * Jeffrey A. Wilson
  * Projectile Studios
  * 
- * 05/20/2018
+ * Created: 05/20/2018
  * 
  * FlightPlannerWindow.java (GUI)
  * 
@@ -13,7 +13,6 @@
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.JLabel;
@@ -31,6 +30,7 @@ import java.awt.Color;
 import java.awt.Toolkit;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JMenu;
 import javax.swing.border.LineBorder;
 
@@ -38,7 +38,7 @@ public class FlightPlannerWindow extends JFrame {
 	
 	private FlightPlanData MASTER_FLIGHT_PLAN = new FlightPlanData(); // Holds the FLight Plan with ALL Waypoints
 	
-	public static final long serialVersionUID = 67L; 
+	public static final long serialVersionUID = 1L; 
 	
 	private final DecimalFormat DF = new DecimalFormat("#.##"); 
 
@@ -61,9 +61,9 @@ public class FlightPlannerWindow extends JFrame {
 	private JTextField TotalTimeField;
 	private JTextField TotalDistanceTextField;
 	
-	JLabel EditorWarningLabel = new JLabel("");
+	private int current_row;
 	
-	private int current_row = 0;
+	private static boolean loadPlanIn = IntroScreen.loadPlanIn;	
 	
 /*
     Function: setNewProject() (void)
@@ -77,12 +77,12 @@ public class FlightPlannerWindow extends JFrame {
 	
 	private void setNewProject()
 	{
-		EditorWarningLabel.setText("");
 		MASTER_FLIGHT_PLAN.resetFlightData();
 		current_row = 0;
 		
 		TotalTimeField.setText(String.valueOf(DF.format((MASTER_FLIGHT_PLAN.getTotalFlightTime()))));
-		WPTNumberLabel.setText(String.valueOf((DF.format(MASTER_FLIGHT_PLAN.getTotalDistance()))));
+		TotalDistanceTextField.setText(String.valueOf((DF.format(MASTER_FLIGHT_PLAN.getTotalDistance()))));
+		WPTNumberLabel.setText("0");
 		SpeedInput.setText("0");
 		HeadingInput.setText("0");
 		AltitudeInput.setText("0");
@@ -161,7 +161,7 @@ public class FlightPlannerWindow extends JFrame {
 			public void run() {
 
 				try {
-					FlightPlannerWindow frame = new FlightPlannerWindow();
+					FlightPlannerWindow frame = new FlightPlannerWindow(loadPlanIn);
 					frame.setVisible(true);
 					
 				} catch (Exception e) {
@@ -171,13 +171,22 @@ public class FlightPlannerWindow extends JFrame {
 		});
 	}
 	
-	public FlightPlannerWindow() {
+	public FlightPlannerWindow(boolean loadPlan) {
 		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Jeffrey\\Desktop\\FlightPlanner\\SOURCE\\AeroNavigationPlanner\\src\\FlightPlannerICON.png"));
 		
 		setResizable(false);
 		setTitle("Flight Plan Summary ");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1123, 576);
+		
+		if(loadPlan == true)
+		{
+			MASTER_FLIGHT_PLAN.initialPopulateFlightPlan();;
+			current_row = DataIO.loadInProjectFile(MASTER_FLIGHT_PLAN);			
+		}
+		else{
+			current_row = 0;
+		}
 		
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
@@ -196,7 +205,11 @@ public class FlightPlannerWindow extends JFrame {
 		JMenuItem mntmNewProject = new JMenuItem("New Project");
 		mntmNewProject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				setNewProject();
+				int reply = JOptionPane.showConfirmDialog(null, "This will erase all unsaved data, continue?", "Important",  JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+				if (reply == JOptionPane.YES_OPTION)
+				{
+					setNewProject();
+				}
 			}
 		});
 		mnFile.add(mntmNewProject);
@@ -204,7 +217,7 @@ public class FlightPlannerWindow extends JFrame {
 		JMenuItem mntmSaveProject = new JMenuItem("Save Project");
 		mntmSaveProject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				DataIO.writeOutProjectFile(MASTER_FLIGHT_PLAN, current_row, MASTER_FLIGHT_PLAN.getTotalDistance(), MASTER_FLIGHT_PLAN.getTotalFlightTime());
 			}
 		});
 		mnFile.add(mntmSaveProject);
@@ -245,8 +258,18 @@ public class FlightPlannerWindow extends JFrame {
 			}
 		});
 		mnHelp.add(mntmUserGuide);
+		
+		JMenu mnAbout = new JMenu("About");
+		menuBar.add(mnAbout);
+		
+		JMenuItem mntmCreator = new JMenuItem("Creator");
+		mntmCreator.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(null, "The Projectile Studios Flight Planner was created by Jeffrey Wilson", "About", JOptionPane.PLAIN_MESSAGE);
+			}
+		});
+		mnAbout.add(mntmCreator);
 		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 				
@@ -265,7 +288,6 @@ public class FlightPlannerWindow extends JFrame {
 		CreateWPTButton.setBounds(960, 485, 132, 23);
 		CreateWPTButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				EditorWarningLabel.setText("");
 				if(current_row < MASTER_FLIGHT_PLAN.getMaxListSize())
 				{
 					if(CalculateEtaCheck.isSelected())
@@ -299,7 +321,7 @@ public class FlightPlannerWindow extends JFrame {
 				}
 				
 				else{
-					EditorWarningLabel.setText("Maximum number of Waypoints Reached.");
+					JOptionPane.showMessageDialog(null, "Maximum number of Waypoints reached!", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 				
 			}
@@ -315,8 +337,6 @@ public class FlightPlannerWindow extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if( (!(InputDeleteWaypoint.getText().isEmpty() )) && Integer.parseInt(InputDeleteWaypoint.getText()) >= 0 && Integer.parseInt(InputDeleteWaypoint.getText()) < current_row )
 				{
-					
-					EditorWarningLabel.setText("");
 					MASTER_FLIGHT_PLAN.deleteWPT(Integer.parseInt(InputDeleteWaypoint.getText()));
 					TotalTimeField.setText(String.valueOf(DF.format((MASTER_FLIGHT_PLAN.getTotalFlightTime()))));
 					TotalDistanceTextField.setText(String.valueOf(DF.format(MASTER_FLIGHT_PLAN.getTotalDistance())));
@@ -325,7 +345,7 @@ public class FlightPlannerWindow extends JFrame {
 					WPTNumberLabel.setText(String.valueOf(current_row));
 				}
 				else{
-					EditorWarningLabel.setText("Cannot delete cell that does not exist.");
+					JOptionPane.showMessageDialog(null, "Cannot Delete a Waypoint that does not exist!", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
@@ -464,7 +484,7 @@ public class FlightPlannerWindow extends JFrame {
 		TotalTimeField.setToolTipText("Estimated time to Complete the flight plan");
 		TotalTimeField.setEditable(false);
 		TotalTimeField.setHorizontalAlignment(SwingConstants.CENTER);
-		TotalTimeField.setText("0");
+		TotalTimeField.setText( String.valueOf(MASTER_FLIGHT_PLAN.getTotalFlightTime()) );
 		TotalTimeField.setBounds(929, 377, 86, 20);
 		contentPane.add(TotalTimeField);
 		TotalTimeField.setColumns(10);
@@ -514,17 +534,11 @@ public class FlightPlannerWindow extends JFrame {
 		TotalDistanceTextField = new JTextField();
 		TotalDistanceTextField.setToolTipText("Estimated Total distance covered by the Flight Plan");
 		TotalDistanceTextField.setHorizontalAlignment(SwingConstants.CENTER);
-		TotalDistanceTextField.setText("0");
+		TotalDistanceTextField.setText( String.valueOf(MASTER_FLIGHT_PLAN.getTotalDistance()) );
 		TotalDistanceTextField.setEditable(false);
 		TotalDistanceTextField.setBounds(929, 408, 86, 20);
 		contentPane.add(TotalDistanceTextField);
 		TotalDistanceTextField.setColumns(10);
-		
-		
-		EditorWarningLabel.setForeground(Color.RED);
-		EditorWarningLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		EditorWarningLabel.setBounds(782, 453, 325, 14);
-		contentPane.add(EditorWarningLabel);
 		
 	
 	}

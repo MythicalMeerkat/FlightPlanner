@@ -2,7 +2,7 @@
  * Jeffrey A. Wilson
  * Projectile Studios
  * 
- * 05/20/2018
+ * Created: 05/20/2018
  * 
  * NotesGUI.java (GUI)
  * 
@@ -44,11 +44,12 @@ public class NotesGUI extends JFrame {
 	}
 
 	public NotesGUI() {
+		setResizable(false);
 		setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\Jeffrey\\Desktop\\FlightPlanner\\SOURCE\\AeroNavigationPlanner\\src\\FlightPlannerICON.png"));
 		
 		NotesTextBox  = new JTextArea();
 		setTitle("Note Editor");
-		setBounds(100, 100, 983, 785);
+		setBounds(100, 100, 960, 785);
 		
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
@@ -86,6 +87,19 @@ public class NotesGUI extends JFrame {
 		});
 		
 		mnFile.add(mntmExit);
+		
+		JMenu mnHelp = new JMenu("Help");
+		menuBar.add(mnHelp);
+		
+		JMenuItem mntmUserGuide = new JMenuItem("User Guide");
+		mntmUserGuide.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				HelpGUI Help_GUI_Frame = new HelpGUI();
+				Help_GUI_Frame.setAlwaysOnTop(true);
+				Help_GUI_Frame.setVisible(true);
+			}
+		});
+		mnHelp.add(mntmUserGuide);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -95,7 +109,6 @@ public class NotesGUI extends JFrame {
 		scrollPane.setBounds(0, 0, 957, 735);
 		contentPane.add(scrollPane);
 		
-		//JTextArea NotesTextBox = new JTextArea();
 		scrollPane.setViewportView(NotesTextBox);
 	}
 }
