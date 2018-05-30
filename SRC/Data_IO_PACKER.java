@@ -17,7 +17,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * 
  * 05/21/2018
  * 
- * DataExporter.java
+ * Created: DataExporter.java
  * 
  * This file creates the skeleton of the DataExporter object that will wirte out the .txt summary as well as the 
  * program specific file (.fpp) that can be used to load a flight plan.
@@ -26,18 +26,14 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Data_IO_PACKER{
 	
-	
-	//private final String project_File_Extension = ".fpp";
-	
-	//private final String formatStr = "%-20s %-15s %-15s %-15s %-15s%n";
+	private final String project_File_Extension = "fpp";
 	
 	private BufferedWriter writer = null;
+	private BufferedReader in = null;
 	
 	private static JFileChooser chooser;
 	
-	private FileNameExtensionFilter filter = null;
-	
-	private BufferedReader in = null;
+	private FileNameExtensionFilter filter = null;	
 
 /*
     Function: DataExporter(FlightPlanData) (DEFAULT Constructor)
@@ -78,13 +74,13 @@ public class Data_IO_PACKER{
 			
 		    try
 		    {
-		    	writer = new BufferedWriter(new FileWriter( file.getAbsolutePath() + ".txt"));
+		    	writer = new BufferedWriter( new FileWriter( (file.getAbsolutePath() + ".txt")) );
 		    	writer.write(content);
 		    	writer.close();
 		    }
 		    catch (IOException e1)
 		    {
-		    	JOptionPane.showMessageDialog(null, "ERROR: Could not be saved!", "InfoBox: " + "ERROR", JOptionPane.INFORMATION_MESSAGE);
+		    	JOptionPane.showMessageDialog(null, "ERROR: Could not be saved!", "InfoBox: " + "Error", JOptionPane.ERROR_MESSAGE);
 		    	
 		    }
 		}
@@ -152,7 +148,7 @@ public class Data_IO_PACKER{
 		    }
 		    catch (IOException e1)
 		    {
-		    	JOptionPane.showMessageDialog(null, "ERROR: Could not be saved!", "InfoBox: " + "ERROR", JOptionPane.INFORMATION_MESSAGE);
+		    	JOptionPane.showMessageDialog(null, "ERROR: Could not be saved!", "InfoBox: " + "Error", JOptionPane.ERROR_MESSAGE);
 		    }
 		}
 		
@@ -173,7 +169,7 @@ public class Data_IO_PACKER{
 		filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
 		chooser.setFileFilter(filter);
 		
-		int returnVal = chooser.showOpenDialog(null); //replace null with your swing container
+		int returnVal = chooser.showOpenDialog(null); 
 		
 		File file = null;
 		String line = null;
@@ -209,34 +205,157 @@ public class Data_IO_PACKER{
     Function: writeOutProjectFile()
 
     Author(s): Jeff Wilson
-    05/22/18
+    05/29/18
 
-    Parameters: TBD
-    Returns: TBD
+    Parameters: PASS_FLIGHT_PLAN (FlightPlanData); the flight plan whose content will be saved externally to as a .txt file
+    			current_row (int); the amount of waypoints in the plan
+    Returns: nothing; writes out a .fpp file to an external location on the computer
     
-    will externally save a .fpp file (FlightPlannerProject) that can later be used to load the app
 */
 	
-	public void writeOutProjectFile()
+	public void writeOutProjectFile(FlightPlanData MASTER_FLIGHT_PLAN, int amount_waypoints, double total_distance, double total_time)
 	{
-		
+		int returnVal = chooser.showSaveDialog(null);
+		File file = chooser.getSelectedFile();
+		if (returnVal == JFileChooser.APPROVE_OPTION)
+		{
+		    try
+		    {
+				writer = new BufferedWriter( new FileWriter(file.getAbsolutePath() + "." + project_File_Extension) );				
+		    	for( int waypoint = 0; waypoint < amount_waypoints; ++waypoint )
+		    	{
+		    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getDistToNext());
+		    		writer.newLine();
+		    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getHDG());
+		    		writer.newLine();
+		    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getALT());
+		    		writer.newLine();
+		    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getSpeed());
+		    		writer.newLine();
+		    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getETA());
+		    		writer.newLine();
+		    		writer.write( MASTER_FLIGHT_PLAN.getWPT(waypoint).getFPM());
+		    		writer.newLine();
+		    	}
+		    	writer.write("!");
+		    	writer.newLine();
+		    	writer.write( String.valueOf(total_distance) );
+		    	writer.newLine();
+		    	writer.write("*");
+		    	writer.newLine();
+		    	writer.write( String.valueOf(total_time) );
+		    	writer.close( );
+		    }
+		    catch (IOException e1)
+		    {
+		    	JOptionPane.showMessageDialog(null, "ERROR: Could not be saved!", "InfoBox: " + "Error", JOptionPane.ERROR_MESSAGE);
+		    }
+		}
 	}
 
 /*
-    Function: writeOutProjectFile()
+    Function: writeOutProjectFile() (int)
 
     Author(s): Jeff Wilson
-    05/22/18
+    05/29/18
 
-    Parameters: TBD
-    Returns: TBD
+    Parameters: MASTER_FLIGHT_PLAN (FlightPlanData); The Flight Plan to be loaded with the data read in from project file
+    Returns: the current row that will be edited in the flight planner window
     
-    will load a .fpp file (FlightPlannerProject) into the application
+   loads in a project file (.fpp) to the application
 */
 	
-	public void loadInProjectFile()
+	public int loadInProjectFile(FlightPlanData MASTER_FLIGHT_PLAN)
 	{
+		filter = new FileNameExtensionFilter("Flight Planner Projects Files", project_File_Extension);
+		chooser.setFileFilter(filter);
 		
+		int returnVal = chooser.showOpenDialog(null); 
+		
+		File file = null;
+		String line = null;
+		
+		int current_Waypoint = 0;
+		int waypoint_item = 1;
+		
+		Waypoint tempPoint = new Waypoint();
+		
+		if(returnVal == JFileChooser.APPROVE_OPTION)  
+		  file = chooser.getSelectedFile();    
+
+		try {
+			in = new BufferedReader(new FileReader(file));
+		} catch (FileNotFoundException e3) {
+			e3.printStackTrace();
+		}
+		
+		try {
+			line = in.readLine();
+		} catch (IOException e2) {
+			e2.printStackTrace();
+			}
+		
+			while(line != null)
+			{
+				if(line.equals("!"))
+				{
+					try {
+						line = in.readLine();
+						MASTER_FLIGHT_PLAN.setTotalDistance(Double.parseDouble(line));
+					  } catch (IOException e1) {
+						e1.printStackTrace();
+					  }
+					
+				}
+				
+				if(line.equals("*"))
+				{
+					try {
+						line = in.readLine();
+						MASTER_FLIGHT_PLAN.setTotalTime(Double.parseDouble(line));
+					  } catch (IOException e1) {
+						e1.printStackTrace();
+					  }
+					
+				}
+				
+				if(waypoint_item % 6 == 1)
+				{
+					tempPoint = new Waypoint();
+				}
+				switch ( (waypoint_item % 6) ) {
+		            case 1:  tempPoint.setDistance(line);
+		            		 waypoint_item++;
+		                     break;
+		            case 2:  tempPoint.setHDG(line);
+		            		 waypoint_item++;
+                    		 break;
+		            case 3:  tempPoint.setALT(line);
+		            		 waypoint_item++;
+                    		 break;
+		            case 4:  tempPoint.setSpeed(line);
+		            		 waypoint_item++;
+           		 			 break;
+		            case 5:  tempPoint.setETA(line);
+		            		 waypoint_item++;
+                    		 break;
+		            case 0:  tempPoint.setFPM(line);
+		            		 MASTER_FLIGHT_PLAN.setWPT(true, current_Waypoint, tempPoint);
+		            		 current_Waypoint++;	
+		            		 waypoint_item++;;
+           		 			 break;
+           		}
+				
+				
+			  
+			  try {
+					line = in.readLine();
+				  } catch (IOException e1) {
+					e1.printStackTrace();
+				  }
+		} 
+			
+		return current_Waypoint;
 	}
 	
 }

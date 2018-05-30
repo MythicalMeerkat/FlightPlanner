@@ -4,7 +4,7 @@
  * 
  * 05/21/2018
  * 
- * FlightPlanData.java
+ * Created: FlightPlanData.java
  * 
  * This file creates the list of waypoints that will make up the flight plan.
  * 
@@ -20,11 +20,11 @@ public class FlightPlanData {
 	
 	private final int MAX_LIST_SIZE = 30; // (ROWS + 1)
 	
-	private double total_distance = 0;
-	private double total_flight_plan_time = 0;
+	private double total_distance;
+	private double total_flight_plan_time;
 
 /*
-    Function: FlightPlanData() (DEFUALTCONSTRUCTOR)
+    Function: FlightPlanData() (DEFUALT CONSTRUCTOR)
 
     Author(s): Jeff Wilson
     05/21/18
@@ -36,6 +36,8 @@ public class FlightPlanData {
 	public FlightPlanData()
 	{
 		initialPopulateFlightPlan();
+		total_distance = 0;
+		total_flight_plan_time = 0;
 	}
 	
 /*
@@ -73,6 +75,11 @@ public class FlightPlanData {
 		}
 		total_distance += Double.parseDouble(getWPT(index).getDistToNext());
 		
+	}
+	
+	public void setWPT(boolean loading, int index, Waypoint newPoint)
+	{
+		WaypointList.set(index, newPoint);
 	}
 	
 /*
@@ -192,6 +199,36 @@ public class FlightPlanData {
 	public final int getMaxListSize()
 	{
 		return MAX_LIST_SIZE;
+	}
+	
+/*
+    Function: setTotalDistance() (void)
+
+    Author(s): Jeff Wilson
+    05/29/18
+
+    Parameters: (double) total_distance; the total distance of the flight plan
+    Returns: sets the total distance of the flight plan
+*/
+	
+	public void setTotalDistance(double total_distance)
+	{
+		this.total_distance = total_distance;
+	}
+	
+/*
+    Function: setTotalDistance() (void)
+
+    Author(s): Jeff Wilson
+    05/29/18
+
+    Parameters: (double) total_flight_plan_time; the total time of the flight plan
+    Returns: sets the total time of the flight plan
+*/
+	
+	public void setTotalTime(double total_flight_plan_time)
+	{
+		this.total_flight_plan_time = total_flight_plan_time;
 	}
 
 }

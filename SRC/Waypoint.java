@@ -2,7 +2,7 @@
  * Jeffrey A. Wilson
  * Projectile Studios
  * 
- * 05/20/2018
+ * Created: 05/20/2018
  * 
  * Waypoint.java
  * 
@@ -54,7 +54,7 @@ Returns: nothing; sets the member variables of the class to the appropriate valu
 
 	NO PARAMETERS
 	Returns: nothing; sets the member variables of the class to empty strings
-	*/
+*/
 	
 	public Waypoint(){
 		WPTNumber = "";
@@ -65,6 +65,15 @@ Returns: nothing; sets the member variables of the class to the appropriate valu
 		ETA = "";
 		Heading = "";
 	}
+
+/*
+	Waypoint "Getter" Functions
+
+	Author(s): Jeff Wilson
+	05/29/18
+
+	return the appropriate member variables named in the function header.
+*/
 	
 	public String getWPTNumber()
 	{
@@ -94,4 +103,39 @@ Returns: nothing; sets the member variables of the class to the appropriate valu
 	{
 		return Heading;
 	}
+	
+/*
+	Waypoint "Setter" Functions
+
+	Author(s): Jeff Wilson
+	05/29/18
+
+	set the appropriate member variables named in the function header.
+*/
+	
+	public void setALT(String Altitude)
+	{
+		this.Altitude = Altitude;
+	}
+	public void setFPM(String FPM)
+	{
+		this.FPM = FPM;
+	}
+	public void setSpeed(String Speed)
+	{
+		this.Speed = Speed;
+	}
+	public void setDistance(String Distance)
+	{
+		this.Distance = Distance;
+	}
+	public void setETA(String ETA)
+	{
+		this.ETA = ETA;
+	}
+	public void setHDG(String Heading)
+	{
+		this.Heading = Heading;
+	}
+
 }

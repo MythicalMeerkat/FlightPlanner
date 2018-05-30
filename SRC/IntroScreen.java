@@ -2,7 +2,7 @@
  * Jeffrey A. Wilson
  * Projectile Studios
  * 
- * 05/20/2018
+ * Created: 05/20/2018
  * 
  * IntroScreen.java (GUI)
  * 
@@ -34,6 +34,8 @@ public class IntroScreen extends JFrame {
 	private JLabel txtWelcomeToThe;
 	private JLabel txtCreateANew;
 	private JLabel txtLoadAnExisting;
+	
+	public static boolean loadPlanIn = false;
 	
 	@SuppressWarnings("unused")
 	private Data_IO_PACKER Data_LOADER;
@@ -105,7 +107,7 @@ public class IntroScreen extends JFrame {
 		btnCreate.setToolTipText("Create a new Flight Plan");
 		btnCreate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				FlightPlannerWindow PlannerWindow = new FlightPlannerWindow();
+				FlightPlannerWindow PlannerWindow = new FlightPlannerWindow(loadPlanIn);
 				PlannerWindow.setVisible(true);
 				dispose();
 			}
@@ -118,13 +120,12 @@ public class IntroScreen extends JFrame {
 		contentPane.add(btnCreate, gbc_btnCreate);
 		
 		JButton btnLoad = new JButton("Load");
-		btnLoad.setToolTipText("Load a FlightPlan (.fpp) (NOT YET AVAILABLE)");
-		btnLoad.setEnabled(false);
+		btnLoad.setToolTipText("Load a FlightPlan (.fpp) ");
 		btnLoad.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				dispose();
-				// TODO: Add Loading from a saved file
-				FlightPlannerWindow PlannerWindow = new FlightPlannerWindow();
+				loadPlanIn = true;
+				FlightPlannerWindow PlannerWindow = new FlightPlannerWindow(loadPlanIn);
 				PlannerWindow.setVisible(true);
 			}
 		});

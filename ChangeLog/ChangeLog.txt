@@ -1,0 +1,33 @@
+-Projectile Studios Flight Planner-
+
+Jeffrey A. Wilson
+
+The Projectile Studios Flight Planner is still in development.
+
+5/29/2018
+---------
+
+- Added saving and loading of flight plans as a .fpp file
+- Added error messages when appropriate
+- Increased performance and shorter loading times
+- First Alpha Desktop Build Released
+
+
+5/24/2018
+---------
+
+- Code Optimization and security fixes.
+- Changed desktop icon and app icons.
+- Added saving of the flight plan as .txt file.
+- Changed UI to reduce clutter in the MAIN WINDOW.
+- Removed 'close' button on the bottom of help GUI to reduce clutter.
+- Added tool text tips that activate by hovering over certain items.
+- Added Menu Bars
+
+5/20/2018
+---------
+
+- Optimizing of the UI
+- Blueprint Design of the UI and prototyping of its features
+
+
