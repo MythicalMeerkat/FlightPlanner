@@ -254,7 +254,7 @@ public class Data_IO_PACKER{
 	}
 
 /*
-    Function: writeOutProjectFile() (int)
+    Function: loadInProjectFile() (int)
 
     Author(s): Jeff Wilson
     05/29/18
